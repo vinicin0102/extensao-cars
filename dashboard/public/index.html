@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSpy PRO - Central de Comando</title>
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --card: #151921;
+            --accent: #00f2ff;
+            --profit: #00ff88;
+            --text: #e0e6ed;
+            --muted: #64748b;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; letter-spacing: 2px; }
+        h1 span { color: var(--accent); }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--accent);
+        }
+
+        .stat-val { font-size: 2.5rem; font-weight: 800; color: var(--accent); }
+        .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; }
+
+        .table-container {
+            margin-top: 40px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #1e293b;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; color: var(--muted); font-size: 0.75rem; padding: 10px; border-bottom: 1px solid #1e293b; }
+        td { padding: 15px 10px; border-bottom: 1px solid #1e293b; font-size: 0.9rem; }
+
+        .profit-badge {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--profit);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--profit);
+        }
+
+        .dot {
+            width: 8px; height: 8px;
+            background: var(--profit);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AUTOSPY <span>CENTRAL</span></h1>
+        <div class="live-indicator">
+            <div class="dot"></div> SISTEMA ONLINE
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="stat-label">Total de Carros Vistos</div>
+            <div id="total-count" class="stat-val">0</div>
+        </div>
+        <div class="card">
+            <div class="stat-label">Lucro Médio Detectado</div>
+            <div id="avg-profit" class="stat-val">R$ 0</div>
+        </div>
+        <div class="card">
+            <div class="stat-label">Oportunidades "Hot"</div>
+            <div id="hot-deals" class="stat-val" style="color: #ff4500;">0</div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <h2>HISTÓRICO DE SCAN (TEMPO REAL)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>HORA</th>
+                    <th>VEÍCULO</th>
+                    <th>MARGEM</th>
+                    <th>LUCRO ESTIMADO</th>
+                </tr>
+            </thead>
+            <tbody id="car-table-body">
+                <!-- Data here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function updateDashboard() {
+            try {
+                const response = await fetch('/api/scanned-cars');
+                const cars = await response.json();
+                
+                document.getElementById('total-count').innerText = cars.length;
+                
+                const tableBody = document.getElementById('car-table-body');
+                tableBody.innerHTML = '';
+                
+                let totalProfit = 0;
+                let hotCount = 0;
+
+                cars.reverse().forEach(car => {
+                    const row = document.createElement('tr');
+                    const profitVal = parseFloat(car.profit || 0);
+                    totalProfit += profitVal;
+                    if (profitVal > 8000) hotCount++;
+
+                    row.innerHTML = `
+                        <td>${car.timestamp}</td>
+                        <td style="font-weight: bold;">${car.title}</td>
+                        <td>${car.percent}%</td>
+                        <td><span class="profit-badge">R$ ${profitVal.toLocaleString('pt-BR')}</span></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                const avg = cars.length > 0 ? (totalProfit / cars.length).toFixed(0) : 0;
+                document.getElementById('avg-profit').innerText = `R$ ${parseInt(avg).toLocaleString('pt-BR')}`;
+                document.getElementById('hot-deals').innerText = hotCount;
+
+            } catch (e) {
+                console.error("Dashboard error:", e);
+            }
+        }
+
+        setInterval(updateDashboard, 2000);
+        updateDashboard();
+    </script>
+</body>
+</html>
