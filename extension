@@ -1,59 +1,135 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const totalEl = document.getElementById("total");
-  const verdesEl = document.getElementById("verdes");
-  const amarelosEl = document.getElementById("amarelos");
-  const vermelhosEl = document.getElementById("vermelhos");
-  const topList = document.getElementById("top-list");
-  const alertsList = document.getElementById("alerts-list");
+  const modeButtons = document.querySelectorAll(".mode-btn");
+  const statusBar = document.getElementById("status-bar");
+  const statusText = document.getElementById("status-text");
+  const scanBtn = document.getElementById("btn-scan");
+  const statsGrid = document.getElementById("stats-grid");
+  const topSection = document.getElementById("top-section");
+  const alertSection = document.getElementById("alert-section");
+  const topTitle = document.getElementById("top-title");
 
+  let currentMode = null;
+
+  // Carrega modo salvo
+  chrome.storage.local.get({ mode: null }, (data) => {
+    if (data.mode) activateMode(data.mode);
+    loadData();
+  });
+
+  // ─── SELECIONAR MODO ───
+  modeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode;
+      activateMode(mode);
+      chrome.storage.local.set({ mode });
+      // Envia para o content script imediatamente
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, { type: "SET_MODE", mode });
+        }
+      });
+    });
+  });
+
+  function activateMode(mode) {
+    currentMode = mode;
+    modeButtons.forEach(b => b.classList.remove("active"));
+    const activeBtn = document.querySelector(`[data-mode="${mode}"]`);
+    if (activeBtn) activeBtn.classList.add("active");
+
+    statusBar.classList.add("active");
+    scanBtn.disabled = false;
+    statsGrid.style.display = "grid";
+    topSection.style.display = "block";
+    alertSection.style.display = "block";
+
+    const labels = {
+      revenda: { status: "Modo REVENDA ativo — buscando lucro máximo", top: "💰 Maiores Margens de Lucro", good: "Lucrativos" },
+      compra: { status: "Modo COMPRA ativo — buscando melhor custo-benefício", top: "🛒 Melhores Preços (Abaixo FIPE)", good: "Baratos" },
+      analise: { status: "Modo ANÁLISE ativo — mostrando todos os dados", top: "📊 Visão Geral do Mercado", good: "Analisados" }
+    };
+
+    const l = labels[mode];
+    statusText.textContent = l.status;
+    topTitle.textContent = l.top;
+    document.getElementById("lbl-bons").textContent = l.good;
+  }
+
+  // ─── SCAN MANUAL ───
+  scanBtn.addEventListener("click", () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: "FORCE_SCAN", mode: currentMode });
+        statusText.textContent = "🔍 Escaneando...";
+        setTimeout(loadData, 2000);
+      }
+    });
+  });
+
+  // ─── DASHBOARD ───
+  document.getElementById("btn-dashboard").addEventListener("click", () => {
+    chrome.tabs.create({ url: "dashboard.html" });
+  });
+
+  // ─── LIMPAR ───
+  document.getElementById("btn-clear").addEventListener("click", () => {
+    chrome.runtime.sendMessage({ type: "CLEAR_CARS" }, () => {
+      loadData();
+    });
+  });
+
+  // ─── CARREGAR DADOS ───
   function loadData() {
     chrome.runtime.sendMessage({ type: "GET_CARS" }, (cars) => {
-      if (!cars || cars.length === 0) return;
+      if (!cars) return;
 
-      totalEl.textContent = cars.length;
-      verdesEl.textContent = cars.filter(c => c.classificacao === "VERDE").length;
-      amarelosEl.textContent = cars.filter(c => c.classificacao === "AMARELO").length;
-      vermelhosEl.textContent = cars.filter(c => c.classificacao === "VERMELHO").length;
+      document.getElementById("total").textContent = cars.length;
 
-      // Top 5 melhores oportunidades
-      const top = cars
-        .filter(c => c.classificacao === "VERDE" && c.lucroLiquido > 0)
-        .sort((a, b) => b.lucroLiquido - a.lucroLiquido)
-        .slice(0, 5);
+      const greens = cars.filter(c => c.classificacao === "VERDE").length;
+      const yellows = cars.filter(c => c.classificacao === "AMARELO").length;
+      const reds = cars.filter(c => c.classificacao === "VERMELHO").length;
 
-      if (top.length > 0) {
-        topList.innerHTML = top.map(c => `
-          <div class="deal-item">
-            <span class="deal-name">${c.marca || ""} ${c.modelo}</span>
-            <span class="deal-profit">+R$ ${c.lucroLiquido.toLocaleString("pt-BR")}</span>
-          </div>
-        `).join("");
+      document.getElementById("bons").textContent = greens;
+      document.getElementById("medios").textContent = yellows;
+      document.getElementById("ruins").textContent = reds;
+
+      // Top list baseado no modo
+      const topList = document.getElementById("top-list");
+      let sorted = [];
+
+      if (currentMode === "revenda") {
+        sorted = cars.filter(c => c.lucroLiquido > 0).sort((a, b) => b.lucroLiquido - a.lucroLiquido);
+      } else if (currentMode === "compra") {
+        sorted = cars.filter(c => c.fipe && c.preco).sort((a, b) => (a.preco - a.fipe) - (b.preco - b.fipe));
+      } else {
+        sorted = [...cars].sort((a, b) => (b.lucroLiquido || 0) - (a.lucroLiquido || 0));
       }
 
-      // Alertas recentes
+      const top5 = sorted.slice(0, 5);
+      if (top5.length > 0) {
+        topList.innerHTML = top5.map(c => {
+          const rightVal = currentMode === "compra"
+            ? `R$ ${c.preco?.toLocaleString("pt-BR") || "?"}`
+            : `+R$ ${c.lucroLiquido?.toLocaleString("pt-BR") || "?"}`;
+          return `<div class="deal-item">
+            <span class="deal-name">${c.marca || ""} ${c.modelo || "?"}</span>
+            <span class="deal-profit">${rightVal}</span>
+          </div>`;
+        }).join("");
+      } else {
+        topList.innerHTML = '<div style="text-align:center;color:#64748b;padding:16px;font-size:0.8rem;">Navegue em um site de carros...</div>';
+      }
+
+      // Alertas
+      const alertsList = document.getElementById("alerts-list");
       const alertCars = cars.filter(c => c.alertas && c.alertas.length > 0).slice(0, 5);
       if (alertCars.length > 0) {
         alertsList.innerHTML = alertCars.map(c =>
           c.alertas.map(a => `<div class="alert-item">${c.modelo}: ${a}</div>`).join("")
         ).join("");
+      } else {
+        alertsList.innerHTML = '<div style="text-align:center;color:#64748b;padding:12px;font-size:0.8rem;">Nenhum alerta</div>';
       }
     });
   }
-
-  loadData();
-
-  document.getElementById("btn-dashboard").addEventListener("click", () => {
-    chrome.tabs.create({ url: "dashboard.html" });
-  });
-
-  document.getElementById("btn-clear").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ type: "CLEAR_CARS" }, () => {
-      totalEl.textContent = "0";
-      verdesEl.textContent = "0";
-      amarelosEl.textContent = "0";
-      vermelhosEl.textContent = "0";
-      topList.innerHTML = '<p class="empty">Dados limpos!</p>';
-      alertsList.innerHTML = '<p class="empty">Dados limpos!</p>';
-    });
-  });
 });
