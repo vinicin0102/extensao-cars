@@ -1,0 +1,51 @@
+.autospy-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    font-family: 'Inter', sans-serif;
+    pointer-events: none;
+    animation: slideInSpy 0.4s ease-out;
+}
+
+@keyframes slideInSpy {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.spy-profit, .spy-neutral {
+    padding: 8px 12px;
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.spy-profit {
+    background: rgba(34, 197, 94, 0.85);
+    color: white;
+}
+
+.spy-neutral {
+    background: rgba(30, 41, 59, 0.85);
+    color: #e2e8f0;
+}
+
+.spy-profit-val {
+    font-weight: 800;
+    font-size: 13px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.spy-percent {
+    font-size: 11px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.spy-icon {
+    font-size: 16px;
+    margin-bottom: 2px;
+}

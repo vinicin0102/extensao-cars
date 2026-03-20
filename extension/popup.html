@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <header>
+            <div class="logo">
+                <img src="icon.png" alt="Logo">
+                <span>AutoSpy <span>PRO</span></span>
+            </div>
+            <div class="status-badge">Ativo</div>
+        </header>
+        
+        <main>
+            <div class="stat-card">
+                <p>Veículos Scaneados</p>
+                <h2 id="scanned-count">0</h2>
+            </div>
+            
+            <div class="hot-deals-section">
+                <h3>Oportunidades do Site</h3>
+                <div id="deals-list" class="deals-list">
+                    <p class="empty-msg">Navegue em um site de carros para ver as ofertas.</p>
+                </div>
+            </div>
+            
+            <button id="scan-btn" class="primary-btn">Forçar Scan de Mercado</button>
+        </main>
+        
+        <footer>
+            <p>Conectado a: <strong>Webmotors/OLX</strong></p>
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
