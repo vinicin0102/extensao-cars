@@ -13,7 +13,7 @@
     "background:#0f172a;color:#00d4ff;font-weight:bold;border:1px solid #00d4ff;padding:6px 14px;border-radius:6px;font-size:13px;"
   );
 
-  var currentMode = null;
+  var currentMode = "analise";
   var processedIds = new Set();
   var allFoundCars = [];
   var scanning = false;
