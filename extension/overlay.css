@@ -1,51 +1,215 @@
+/* AutoSpy PRO v4.1 — Overlay Compacto Estilo Profissional */
+
+/* ─── BADGE CONTAINER ─── */
 .autospy-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 9999;
-    font-family: 'Inter', sans-serif;
-    pointer-events: none;
-    animation: slideInSpy 0.4s ease-out;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 99999;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+  animation: spyFadeIn 0.3s ease;
 }
 
-@keyframes slideInSpy {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+.spy-full-page {
+  position: fixed !important;
+  top: 16px;
+  left: auto;
+  right: 16px;
+  max-width: 280px;
+  z-index: 2147483647;
+  pointer-events: auto;
+  display: block;
 }
 
-.spy-profit, .spy-neutral {
-    padding: 8px 12px;
-    border-radius: 8px;
-    backdrop-filter: blur(8px);
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+@keyframes spyFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.spy-profit {
-    background: rgba(34, 197, 94, 0.85);
-    color: white;
+/* ─── COMPACT OVERLAY (estilo bolha branca) ─── */
+.spy-compact {
+  background: #ffffff;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: #111827;
+  max-width: 220px;
 }
 
-.spy-neutral {
-    background: rgba(30, 41, 59, 0.85);
-    color: #e2e8f0;
+.spy-compact.spy-border-green { border-left-color: #22c55e; }
+.spy-compact.spy-border-yellow { border-left-color: #eab308; }
+.spy-compact.spy-border-red { border-left-color: #ef4444; }
+.spy-compact.spy-border-gray { border-left-color: #6b7280; }
+
+/* Top row: Tabela + Margem */
+.spy-info-line {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1.3;
 }
 
-.spy-profit-val {
-    font-weight: 800;
-    font-size: 13px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+.spy-info-line strong {
+  font-weight: 800;
+  color: #111827;
 }
 
-.spy-percent {
-    font-size: 11px;
-    opacity: 0.9;
-    font-weight: 500;
+.spy-info-line strong.val-green { color: #16a34a; }
+.spy-info-line strong.val-red { color: #dc2626; }
+.spy-info-line strong.val-yellow { color: #ca8a04; }
+
+/* Score circle mini */
+.spy-mini-score {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.4);
+}
+.spy-mini-score.ms-green { border-color: #22c55e; color: #22c55e; }
+.spy-mini-score.ms-yellow { border-color: #eab308; color: #eab308; }
+.spy-mini-score.ms-red { border-color: #ef4444; color: #ef4444; }
+
+/* Tags row */
+.spy-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
 }
 
-.spy-icon {
-    font-size: 16px;
-    margin-bottom: 2px;
+.spy-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+}
+
+/* Colors removed in favor of simple text */
+
+/* ─── FULL PAGE OVERLAY (detalhes do carro) ─── */
+.spy-full-card {
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(12px);
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  max-width: 300px;
+}
+
+.spy-full-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.spy-full-score {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 900;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.3);
+}
+.spy-full-score.fs-green { border-color: #22c55e; color: #22c55e; }
+.spy-full-score.fs-yellow { border-color: #eab308; color: #eab308; }
+.spy-full-score.fs-red { border-color: #ef4444; color: #ef4444; }
+
+.spy-full-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.spy-full-subtitle {
+  font-size: 10px;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.spy-full-row {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d1d5db;
+}
+.spy-full-lucro {
+  font-size: 14px;
+  font-weight: 900;
+}
+.spy-full-lucro.positive { color: #22c55e; }
+.spy-full-lucro.negative { color: #ef4444; }
+
+.spy-full-reco {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 5px 8px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 6px;
+  text-align: center;
+  color: #e5e7eb;
+}
+
+.spy-full-alerts {
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.spy-full-alert {
+  font-size: 9px;
+  font-weight: 700;
+  color: #fbbf24;
+  padding: 2px 0;
+}
+
+/* ═══════════════════════════════════════════ */
+/* ─── HIGHLIGHT SYSTEM ─── */
+/* ═══════════════════════════════════════════ */
+.autospy-highlight {
+  transition: all 0.3s ease !important;
+}
+.autospy-hl-green {
+  outline: 3px solid #22c55e !important;
+  outline-offset: -1px;
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.3) !important;
+}
+.autospy-hl-yellow {
+  outline: 3px solid #eab308 !important;
+  outline-offset: -1px;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.3) !important;
+}
+.autospy-hl-red {
+  outline: 3px solid #ef4444 !important;
+  outline-offset: -1px;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.25) !important;
+}
+.autospy-hl-green {
+  animation: glowGreen 2s infinite;
+}
+@keyframes glowGreen {
+  0%, 100% { box-shadow: 0 0 12px rgba(34,197,94,0.25) !important; }
+  50% { box-shadow: 0 0 24px rgba(34,197,94,0.5) !important; }
 }

@@ -5,34 +5,119 @@
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <div class="popup-container">
+    <div class="popup">
         <header>
-            <div class="logo">
-                <img src="icon.png" alt="Logo">
-                <span>AutoSpy <span>PRO</span></span>
+            <div class="brand">
+                <img src="icon.png" alt="Logo" class="logo-img">
+                <h1>AutoSpy <span>PRO</span></h1>
             </div>
-            <div class="status-badge">Ativo</div>
+            <div class="version">v4.0</div>
         </header>
-        
-        <main>
-            <div class="stat-card">
-                <p>Veículos Scaneados</p>
-                <h2 id="scanned-count">0</h2>
+
+        <!-- MODO DE OPERAÇÃO -->
+        <div class="mode-section">
+            <p class="mode-title">MODO DE OPERAÇÃO</p>
+            <div class="mode-grid">
+                <button class="mode-btn" data-mode="revenda" id="mode-revenda">
+                    <span class="mode-icon">💰</span>
+                    <span class="mode-name">Revenda</span>
+                    <span class="mode-desc">Maior lucro</span>
+                </button>
+                <button class="mode-btn" data-mode="compra" id="mode-compra">
+                    <span class="mode-icon">🛒</span>
+                    <span class="mode-name">Compra</span>
+                    <span class="mode-desc">Melhor preço</span>
+                </button>
+                <button class="mode-btn" data-mode="analise" id="mode-analise">
+                    <span class="mode-icon">📊</span>
+                    <span class="mode-name">Análise</span>
+                    <span class="mode-desc">Dados completos</span>
+                </button>
             </div>
-            
-            <div class="hot-deals-section">
-                <h3>Oportunidades do Site</h3>
-                <div id="deals-list" class="deals-list">
-                    <p class="empty-msg">Navegue em um site de carros para ver as ofertas.</p>
+        </div>
+
+        <!-- STATUS -->
+        <div class="status-bar" id="status-bar">
+            <div class="status-dot"></div>
+            <span id="status-text">Selecione um modo acima para começar</span>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-grid" id="stats-grid" style="display:none;">
+            <div class="stat">
+                <div class="stat-val" id="total">0</div>
+                <div class="stat-label">Encontrados</div>
+            </div>
+            <div class="stat s-green">
+                <div class="stat-val" id="bons">0</div>
+                <div class="stat-label" id="lbl-bons">Comprar</div>
+            </div>
+            <div class="stat s-yellow">
+                <div class="stat-val" id="medios">0</div>
+                <div class="stat-label">Analisar</div>
+            </div>
+            <div class="stat s-red">
+                <div class="stat-val" id="ruins">0</div>
+                <div class="stat-label">Evitar</div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tab-bar" id="tab-bar" style="display:none;">
+            <button class="tab active" data-tab="melhores">🏆 Melhores</button>
+            <button class="tab" data-tab="todos">📋 Todos</button>
+            <button class="tab" data-tab="alertas">⚠️ Alertas</button>
+        </div>
+
+        <!-- TAB: MELHORES CARROS -->
+        <div class="tab-content active" id="tab-melhores">
+            <div class="section" id="top-section" style="display:none;">
+                <h2 id="top-title">🏆 Melhores para Compra</h2>
+                <div id="top-list" class="car-list"></div>
+            </div>
+        </div>
+
+        <!-- TAB: TODOS OS CARROS DO SITE -->
+        <div class="tab-content" id="tab-todos">
+            <div class="section">
+                <h2>📋 Todos os Carros Encontrados</h2>
+                <div class="filter-row">
+                    <select id="filter-class">
+                        <option value="">Todos</option>
+                        <option value="VERDE">🟢 Bons</option>
+                        <option value="AMARELO">🟡 Médios</option>
+                        <option value="VERMELHO">🔴 Evitar</option>
+                    </select>
+                    <select id="filter-sort">
+                        <option value="score">Melhor Score</option>
+                        <option value="preco-asc">Menor Preço</option>
+                        <option value="preco-desc">Maior Preço</option>
+                        <option value="lucro">Maior Lucro</option>
+                        <option value="margem">Maior Margem</option>
+                    </select>
                 </div>
+                <div id="all-cars-list" class="car-list expanded"></div>
+                <div class="cars-count" id="cars-count"></div>
             </div>
-            
-            <button id="scan-btn" class="primary-btn">Forçar Scan de Mercado</button>
-        </main>
-        
-        <footer>
-            <p>Conectado a: <strong>Webmotors/OLX</strong></p>
-        </footer>
+        </div>
+
+        <!-- TAB: ALERTAS -->
+        <div class="tab-content" id="tab-alertas">
+            <div class="section" id="alert-section" style="display:none;">
+                <h2>⚠️ Alertas e Avisos</h2>
+                <div id="alerts-list" class="item-list"></div>
+            </div>
+        </div>
+
+        <!-- AÇÕES -->
+        <div class="actions">
+            <button id="btn-scan" class="btn primary" disabled>🔍 Escanear Tudo</button>
+            <button id="btn-dashboard" class="btn secondary">📊 Dashboard</button>
+        </div>
+        <div class="bottom-row">
+            <button id="btn-export" class="btn-text">📥 Exportar CSV</button>
+            <button id="btn-clear" class="btn-text">🗑️ Limpar</button>
+        </div>
     </div>
     <script src="popup.js"></script>
 </body>

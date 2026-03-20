@@ -1,18 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "AutoSpy - Car Arbitrage & Profit Scanner",
-  "version": "1.0",
-  "description": "Espie sites de carros, veja margens de lucro e os modelos mais vendidos em tempo real.",
-  "permissions": ["activeTab", "scripting", "storage", "http://localhost:3000/*"],
+  "name": "AutoSpy PRO - Inteligência Automotiva Total",
+  "version": "5.0",
+  "description": "Análise inteligente de carros em QUALQUER site. Tabela FIPE, margem, score, indicadores — funciona em todos os sites de veículos.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon.png"
   },
   "content_scripts": [
     {
-      "matches": ["*://*.webmotors.com.br/*", "*://*.olx.com.br/*"],
+      "matches": ["<all_urls>"],
       "js": ["content.js"],
-      "css": ["overlay.css"]
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
     }
   ],
   "icons": {

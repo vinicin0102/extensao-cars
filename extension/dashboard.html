@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>AutoSpy PRO — Central de Inteligência</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    :root {
+      --bg: #060810;
+      --bg-2: #0c1018;
+      --card: #111827;
+      --card-hover: #1a2332;
+      --border: #1e293b;
+      --accent: #00d4ff;
+      --text: #e5e7eb;
+      --muted: #6b7280;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --orange: #f97316;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── LAYOUT ─── */
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+
+    /* ─── HEADER ─── */
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dash-header-left { display: flex; align-items: center; gap: 16px; }
+    .dash-header h1 { font-size: 1.5rem; letter-spacing: 2px; font-weight: 900; }
+    .dash-header h1 span { color: var(--accent); }
+    .dash-subtitle { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+    .live-badge {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--green); font-size: 0.85rem; font-weight: 600;
+    }
+    .live-badge .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity:0.5; } 50% { opacity:1; }
+    }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .header-btn {
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 16px;
+      border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .header-btn:hover { background: var(--card-hover); border-color: var(--accent); color: var(--accent); }
+
+    /* ─── STAT CARDS ─── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .stat-card::before {
+      content:''; position:absolute; top:0; left:0;
+      width:4px; height:100%;
+    }
+    .stat-card.c-blue::before { background: var(--accent); }
+    .stat-card.c-green::before { background: var(--green); }
+    .stat-card.c-yellow::before { background: var(--yellow); }
+    .stat-card.c-red::before { background: var(--red); }
+    .stat-card.c-purple::before { background: var(--purple); }
+    .stat-card.c-orange::before { background: var(--orange); }
+    .stat-card .val { font-size: 1.8rem; font-weight: 900; }
+    .stat-card.c-blue .val { color: var(--accent); }
+    .stat-card.c-green .val { color: var(--green); }
+    .stat-card.c-yellow .val { color: var(--yellow); }
+    .stat-card.c-red .val { color: var(--red); }
+    .stat-card.c-purple .val { color: var(--purple); }
+    .stat-card.c-orange .val { color: var(--orange); }
+    .stat-card .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .stat-card .sub { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+
+    /* ─── FILTERS ─── */
+    .filters {
+      display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+    }
+    .filters select, .filters input {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-family: inherit;
+    }
+    .filters select:focus, .filters input:focus { outline: none; border-color: var(--accent); }
+    .filter-label { color: var(--muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+
+    /* ─── TABLE ─── */
+    .table-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      overflow-x: auto;
+      margin-bottom: 28px;
+    }
+    .table-wrap h2 {
+      font-size: 0.85rem; color: var(--text); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .table-wrap h2 .count { color: var(--accent); font-weight: 900; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; color: var(--muted); font-size: 0.68rem;
+      padding: 10px 8px; border-bottom: 2px solid var(--border);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      white-space: nowrap; cursor: pointer;
+      user-select: none; transition: color 0.2s;
+    }
+    th:hover { color: var(--accent); }
+    th.sorted { color: var(--accent); }
+    td {
+      padding: 12px 8px; border-bottom: 1px solid rgba(30,41,59,0.5);
+      font-size: 0.82rem;
+    }
+    tr { transition: background 0.15s; }
+    tr:hover { background: rgba(0,212,255,0.03); }
+    tr.row-green { border-left: 3px solid var(--green); }
+    tr.row-yellow { border-left: 3px solid var(--yellow); }
+    tr.row-red { border-left: 3px solid var(--red); }
+
+    /* ─── BADGES ─── */
+    .badge {
+      padding: 3px 10px; border-radius: 20px; font-size: 0.68rem;
+      font-weight: 700; display: inline-block; white-space: nowrap;
+    }
+    .badge.verde { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge.amarelo { background: rgba(234,179,8,0.15); color: var(--yellow); }
+    .badge.vermelho { background: rgba(239,68,68,0.15); color: var(--red); }
+    .badge.cinza { background: rgba(107,114,128,0.15); color: var(--muted); }
+
+    .tag {
+      padding: 2px 6px; border-radius: 6px; font-size: 0.62rem;
+      font-weight: 700; display: inline-block; white-space: nowrap;
+      margin: 1px;
+    }
+    .tag.t-green { background: rgba(34,197,94,0.12); color: var(--green); }
+    .tag.t-red { background: rgba(239,68,68,0.12); color: var(--red); }
+    .tag.t-yellow { background: rgba(234,179,8,0.12); color: var(--yellow); }
+    .tag.t-blue { background: rgba(0,212,255,0.1); color: var(--accent); }
+    .tag.t-purple { background: rgba(168,85,247,0.12); color: var(--purple); }
+
+    .profit-pos { color: var(--green); font-weight: 800; }
+    .profit-neg { color: var(--red); font-weight: 800; }
+
+    .score-cell {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid; font-weight: 900; font-size: 0.8rem;
+    }
+    .score-green { border-color: var(--green); color: var(--green); }
+    .score-yellow { border-color: var(--yellow); color: var(--yellow); }
+    .score-red { border-color: var(--red); color: var(--red); }
+
+    .tendencia-up { color: var(--green); }
+    .tendencia-down { color: var(--red); }
+    .tendencia-stable { color: var(--yellow); }
+
+    .link-btn {
+      background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2);
+      color: var(--accent); padding: 4px 10px; border-radius: 6px;
+      font-size: 0.72rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .link-btn:hover { background: rgba(0,212,255,0.2); }
+
+    /* ─── RANKINGS ─── */
+    .grid-2 {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+      margin-bottom: 28px;
+    }
+    .grid-3 {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px;
+      margin-bottom: 28px;
+    }
+    .ranking-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .ranking-card h3 {
+      font-size: 0.82rem; color: var(--muted); margin-bottom: 14px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .rank-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid rgba(30,41,59,0.5);
+      font-size: 0.82rem;
+    }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-pos { color: var(--accent); font-weight: 900; margin-right: 10px; min-width: 24px; }
+    .rank-right { font-weight: 700; }
+
+    .empty-dash {
+      text-align: center; padding: 60px 0; color: var(--muted); font-size: 1.1rem;
+    }
+    .empty-dash .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1200px) {
+      .stats-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 800px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .container { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="dash-header">
+      <div class="dash-header-left">
+        <div>
+          <h1>AUTOSPY <span>CENTRAL</span></h1>
+          <div class="dash-subtitle">Inteligência completa de mercado automotivo</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="live-badge"><div class="dot"></div> SISTEMA ONLINE</div>
+        <button class="header-btn" id="btn-export-csv">📥 Exportar CSV</button>
+        <button class="header-btn" id="btn-clear-all">🗑️ Limpar Tudo</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card c-blue">
+        <div class="lbl">Total Encontrados</div>
+        <div class="val" id="s-total">0</div>
+        <div class="sub" id="s-sites">0 sites</div>
+      </div>
+      <div class="stat-card c-green">
+        <div class="lbl">🟢 Excelente Negócio</div>
+        <div class="val" id="s-green">0</div>
+        <div class="sub">Score ≥ 75</div>
+      </div>
+      <div class="stat-card c-yellow">
+        <div class="lbl">🟡 Negócio Mediano</div>
+        <div class="val" id="s-yellow">0</div>
+        <div class="sub">Score 55-74</div>
+      </div>
+      <div class="stat-card c-red">
+        <div class="lbl">🔴 Evitar</div>
+        <div class="val" id="s-red">0</div>
+        <div class="sub">Score &lt; 55</div>
+      </div>
+      <div class="stat-card c-purple">
+        <div class="lbl">📈 Valorizando</div>
+        <div class="val" id="s-valorizando">0</div>
+        <div class="sub">Tendência de alta</div>
+      </div>
+      <div class="stat-card c-orange">
+        <div class="lbl">💰 Lucro Potencial</div>
+        <div class="val" id="s-lucro-total">R$ 0</div>
+        <div class="sub">Soma dos top 10</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <span class="filter-label">Filtros:</span>
+      <select id="f-class">
+        <option value="">Todos</option>
+        <option value="VERDE">🟢 Excelente</option>
+        <option value="AMARELO">🟡 Mediano</option>
+        <option value="VERMELHO">🔴 Evitar</option>
+      </select>
+      <select id="f-brand">
+        <option value="">Todas Marcas</option>
+      </select>
+      <select id="f-tendencia">
+        <option value="">Todas Tendências</option>
+        <option value="subindo">📈 Valorizando</option>
+        <option value="estavel">➡️ Estável</option>
+        <option value="caindo">📉 Desvalorizando</option>
+      </select>
+      <select id="f-sort">
+        <option value="score">Melhor Score</option>
+        <option value="lucro">Maior Lucro</option>
+        <option value="margem">Maior Margem</option>
+        <option value="preco-asc">Menor Preço</option>
+        <option value="preco-desc">Maior Preço</option>
+        <option value="liquidez">Maior Liquidez</option>
+      </select>
+      <input type="text" id="f-search" placeholder="🔍 Buscar modelo...">
+    </div>
+
+    <div class="table-wrap">
+      <h2>📋 Análise Completa de Todos os Veículos <span class="count" id="table-count"></span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Score</th>
+            <th>Status</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Ano</th>
+            <th>KM</th>
+            <th>Preço</th>
+            <th>FIPE</th>
+            <th>vs FIPE</th>
+            <th>Lucro Líq.</th>
+            <th>Margem</th>
+            <th>Demanda</th>
+            <th>Liquidez</th>
+            <th>Tendência</th>
+            <th>Revenda</th>
+            <th>Indicadores</th>
+            <th>Recomendação</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <div class="grid-3">
+      <div class="ranking-card">
+        <h3>🏆 Top 10 — Melhor Score de Compra</h3>
+        <div id="rank-score"></div>
+      </div>
+      <div class="ranking-card">
+        <h3>💰 Top 10 — Mais Lucrativos</h3>
+        <div id="rank-profit"></div>
+      </div>
+      <div class="ranking-card">
+        <h3>💀 Top 10 — Piores Negócios</h3>
+        <div id="rank-worst"></div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="ranking-card">
+        <h3>📈 Valorizando Agora</h3>
+        <div id="rank-valorizing"></div>
+      </div>
+      <div class="ranking-card">
+        <h3>🔥 Modelos Mais Vistos</h3>
+        <div id="rank-popular"></div>
+      </div>
+      <div class="ranking-card">
+        <h3>⚡ Mais Fácil de Revender</h3>
+        <div id="rank-liquidity"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function loadDashboard() {
+      chrome.runtime.sendMessage({ type: "GET_CARS" }, (cars) => {
+        if (!cars || cars.length === 0) {
+          document.querySelector(".table-wrap").innerHTML = '<div class="empty-dash"><div class="empty-icon">🚗</div>Navegue em sites de carros para começar a análise...<br><small style="color:#4b5563">A extensão irá detectar e analisar automaticamente</small></div>';
+          return;
+        }
+
+        // Stats
+        document.getElementById("s-total").textContent = cars.length;
+        document.getElementById("s-green").textContent = cars.filter(c => c.classificacao === "VERDE").length;
+        document.getElementById("s-yellow").textContent = cars.filter(c => c.classificacao === "AMARELO").length;
+        document.getElementById("s-red").textContent = cars.filter(c => c.classificacao === "VERMELHO").length;
+        document.getElementById("s-valorizando").textContent = cars.filter(c => c.valorizando).length;
+
+        // Sites
+        const sites = new Set(cars.map(c => c.siteHost).filter(Boolean));
+        document.getElementById("s-sites").textContent = sites.size + " site(s)";
+
+        // Lucro potencial top 10
+        const top10 = cars.filter(c => c.lucroLiquido > 0).sort((a, b) => b.lucroLiquido - a.lucroLiquido).slice(0, 10);
+        const lucroTotal = top10.reduce((sum, c) => sum + (c.lucroLiquido || 0), 0);
+        document.getElementById("s-lucro-total").textContent = "R$ " + lucroTotal.toLocaleString("pt-BR");
+
+        // Populate filters
+        const brands = [...new Set(cars.map(c => c.marca).filter(Boolean))].sort();
+        const brandSel = document.getElementById("f-brand");
+        brands.forEach(b => {
+          const opt = document.createElement("option");
+          opt.value = b; opt.textContent = b;
+          brandSel.appendChild(opt);
+        });
+
+        renderTable(cars);
+        renderRankings(cars);
+
+        // Filters
+        const filterEls = ["f-class", "f-brand", "f-tendencia", "f-sort"];
+        filterEls.forEach(id => {
+          document.getElementById(id).addEventListener("change", () => applyFilters(cars));
+        });
+        document.getElementById("f-search").addEventListener("input", () => applyFilters(cars));
+
+        // Export
+        document.getElementById("btn-export-csv").addEventListener("click", () => exportCSV(cars));
+
+        // Clear
+        document.getElementById("btn-clear-all").addEventListener("click", () => {
+          if (confirm("Tem certeza que deseja limpar todo o histórico?")) {
+            chrome.runtime.sendMessage({ type: "CLEAR_CARS" }, () => location.reload());
+          }
+        });
+      });
+    }
+
+    function applyFilters(cars) {
+      const cls = document.getElementById("f-class").value;
+      const brand = document.getElementById("f-brand").value;
+      const tendencia = document.getElementById("f-tendencia").value;
+      const sort = document.getElementById("f-sort").value;
+      const search = document.getElementById("f-search").value.toUpperCase();
+
+      let filtered = [...cars];
+      if (cls) filtered = filtered.filter(c => c.classificacao === cls);
+      if (brand) filtered = filtered.filter(c => c.marca === brand);
+      if (tendencia) filtered = filtered.filter(c => c.tendencia === tendencia);
+      if (search) filtered = filtered.filter(c => (c.modelo || "").toUpperCase().includes(search) || (c.marca || "").toUpperCase().includes(search));
+
+      // Sort
+      if (sort === "score") filtered.sort((a, b) => (b.scoreCompra || 0) - (a.scoreCompra || 0));
+      else if (sort === "lucro") filtered.sort((a, b) => (b.lucroLiquido || -999999) - (a.lucroLiquido || -999999));
+      else if (sort === "margem") filtered.sort((a, b) => (b.margemPercent || -999) - (a.margemPercent || -999));
+      else if (sort === "preco-asc") filtered.sort((a, b) => (a.preco || 0) - (b.preco || 0));
+      else if (sort === "preco-desc") filtered.sort((a, b) => (b.preco || 0) - (a.preco || 0));
+      else if (sort === "liquidez") filtered.sort((a, b) => (b.liquidez || 0) - (a.liquidez || 0));
+
+      renderTable(filtered);
+    }
+
+    function renderTable(cars) {
+      const tbody = document.getElementById("table-body");
+      document.getElementById("table-count").textContent = `(${cars.length} veículos)`;
+
+      tbody.innerHTML = cars.map(c => {
+        const clsMap = { VERDE: "verde", AMARELO: "amarelo", VERMELHO: "vermelho", CINZA: "cinza" };
+        const rowCls = { VERDE: "row-green", AMARELO: "row-yellow", VERMELHO: "row-red" };
+        const badgeCls = clsMap[c.classificacao] || "cinza";
+        const profitCls = (c.lucroLiquido >= 0) ? "profit-pos" : "profit-neg";
+        const scoreCls = c.scoreCompra >= 75 ? "score-green" : c.scoreCompra >= 55 ? "score-yellow" : "score-red";
+        const tendenciaCls = c.tendencia === "subindo" ? "tendencia-up" : c.tendencia === "caindo" ? "tendencia-down" : "tendencia-stable";
+        const tendenciaIcon = c.tendencia === "subindo" ? "📈" : c.tendencia === "caindo" ? "📉" : "➡️";
+
+        // Diff FIPE
+        let diffHTML = "—";
+        if (c.diffFipePercent != null) {
+          if (c.diffFipePercent > 0) {
+            diffHTML = `<span class="profit-pos">-${Math.abs(c.diffFipePercent)}%</span>`;
+          } else {
+            diffHTML = `<span class="profit-neg">+${Math.abs(c.diffFipePercent)}%</span>`;
+          }
+        }
+
+        // Indicadores
+        let tags = "";
+        if (c.bomNegocio) tags += '<span class="tag t-green">✅ Bom</span>';
+        if (c.margemAlta) tags += '<span class="tag t-green">💰 Margem</span>';
+        if (c.compensa) tags += '<span class="tag t-blue">🎯</span>';
+        if (c.bomCarro) tags += '<span class="tag t-purple">⭐</span>';
+        if (c.valorizando) tags += '<span class="tag t-green">📈</span>';
+        if (c.desvalorizando) tags += '<span class="tag t-red">📉</span>';
+
+        return `<tr class="${rowCls[c.classificacao] || ""}">
+          <td><div class="score-cell ${scoreCls}">${c.scoreCompra || 0}</div></td>
+          <td><span class="badge ${badgeCls}">${c.label || "?"}</span></td>
+          <td>${c.marca || "—"}</td>
+          <td><strong>${c.modelo || "—"}</strong></td>
+          <td>${c.ano || "—"}</td>
+          <td>${c.km ? c.km.toLocaleString("pt-BR") : "—"}</td>
+          <td>R$ ${c.preco ? c.preco.toLocaleString("pt-BR") : "—"}</td>
+          <td>${c.fipe ? "R$ " + c.fipe.toLocaleString("pt-BR") : "—"}</td>
+          <td>${diffHTML}</td>
+          <td class="${profitCls}">${c.lucroLiquido != null ? "R$ " + c.lucroLiquido.toLocaleString("pt-BR") : "—"}</td>
+          <td>${c.margemPercent != null ? c.margemPercent + "%" : "—"}</td>
+          <td>${c.demanda || "—"}</td>
+          <td>${c.liquidez ? c.liquidez + "/10" : "—"}</td>
+          <td class="${tendenciaCls}">${c.tendencia ? tendenciaIcon + " " + c.tendencia : "—"}</td>
+          <td>${c.revenda_dias ? "~" + c.revenda_dias + "d" : "—"}</td>
+          <td>${tags || "—"}</td>
+          <td style="font-size:0.68rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.recomendacao || "—"}</td>
+          <td>${c.url ? '<a href="' + c.url + '" target="_blank" class="link-btn">Ver →</a>' : '—'}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function renderRankings(cars) {
+      // Top Score
+      const topScore = cars.filter(c => c.scoreCompra > 0).sort((a, b) => b.scoreCompra - a.scoreCompra).slice(0, 10);
+      document.getElementById("rank-score").innerHTML = topScore.length
+        ? topScore.map((c, i) => `<div class="rank-item"><span><span class="rank-pos">#${i+1}</span>${c.marca || ""} ${c.modelo}</span><span class="rank-right" style="color:var(--accent)">${c.scoreCompra}/100</span></div>`).join("")
+        : emptyRank();
+
+      // Top Lucro
+      const topProfit = cars.filter(c => c.lucroLiquido > 0).sort((a, b) => b.lucroLiquido - a.lucroLiquido).slice(0, 10);
+      document.getElementById("rank-profit").innerHTML = topProfit.length
+        ? topProfit.map((c, i) => `<div class="rank-item"><span><span class="rank-pos">#${i+1}</span>${c.marca || ""} ${c.modelo}</span><span class="profit-pos">+R$ ${c.lucroLiquido.toLocaleString("pt-BR")}</span></div>`).join("")
+        : emptyRank();
+
+      // Piores negócios
+      const worst = cars.filter(c => c.lucroLiquido != null).sort((a, b) => a.lucroLiquido - b.lucroLiquido).slice(0, 10);
+      document.getElementById("rank-worst").innerHTML = worst.length
+        ? worst.map((c, i) => `<div class="rank-item"><span><span class="rank-pos">#${i+1}</span>${c.marca || ""} ${c.modelo}</span><span class="profit-neg">R$ ${c.lucroLiquido.toLocaleString("pt-BR")}</span></div>`).join("")
+        : emptyRank();
+
+      // Valorizando
+      const valorizing = cars.filter(c => c.valorizando).sort((a, b) => (b.scoreCompra || 0) - (a.scoreCompra || 0)).slice(0, 10);
+      document.getElementById("rank-valorizing").innerHTML = valorizing.length
+        ? valorizing.map((c, i) => `<div class="rank-item"><span><span class="rank-pos">#${i+1}</span>${c.marca || ""} ${c.modelo}</span><span style="color:var(--green)">📈 Score: ${c.scoreCompra}</span></div>`).join("")
+        : emptyRank();
+
+      // Populares
+      const modelCount = {};
+      cars.forEach(c => {
+        const key = (c.marca || "") + " " + (c.modelo || "?");
+        modelCount[key] = (modelCount[key] || 0) + 1;
+      });
+      const popular = Object.entries(modelCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      document.getElementById("rank-popular").innerHTML = popular.map((e, i) =>
+        `<div class="rank-item"><span><span class="rank-pos">#${i+1}</span>${e[0]}</span><span>${e[1]}x</span></div>`
+      ).join("");
+
+      // Mais líquidos
+      const liquidos = cars.filter(c => c.liquidez && c.revenda_dias).sort((a, b) => a.revenda_dias - b.revenda_dias).slice(0, 10);
+      const seen = new Set();
+      document.getElementById("rank-liquidity").innerHTML = liquidos.length
+        ? liquidos.filter(c => {
+            const k = c.marca + c.modelo;
+            if (seen.has(k)) return false;
+            seen.add(k);
+            return true;
+          }).map((c, i) => `<div class="rank-item"><span><span class="rank-pos">#${i+1}</span>${c.marca || ""} ${c.modelo}</span><span style="color:var(--accent)">⏱️ ~${c.revenda_dias}d</span></div>`).join("")
+        : emptyRank();
+    }
+
+    function emptyRank() {
+      return '<div style="color:var(--muted);padding:16px;text-align:center;font-size:0.82rem">Sem dados ainda</div>';
+    }
+
+    function exportCSV(cars) {
+      const headers = ["Score","Classificação","Marca","Modelo","Ano","KM","Preço","FIPE","Diff FIPE %","Lucro Líq.","Margem %","Demanda","Liquidez","Tendência","Dias Revenda","Bom Negócio","Margem Alta","Compensa","Bom Carro","Valorizando","Combustível","Câmbio","Vendedor","Recomendação","Site","URL"];
+      const rows = cars.map(c => [
+        c.scoreCompra || 0,
+        c.label || "",
+        c.marca || "",
+        c.modelo || "",
+        c.ano || "",
+        c.km || "",
+        c.preco || "",
+        c.fipe || "",
+        c.diffFipePercent || "",
+        c.lucroLiquido || "",
+        c.margemPercent || "",
+        c.demanda || "",
+        c.liquidez || "",
+        c.tendencia || "",
+        c.revenda_dias || "",
+        c.bomNegocio ? "SIM" : "NÃO",
+        c.margemAlta ? "SIM" : "NÃO",
+        c.compensa ? "SIM" : "NÃO",
+        c.bomCarro ? "SIM" : "NÃO",
+        c.valorizando ? "SIM" : "NÃO",
+        c.combustivel || "",
+        c.cambio || "",
+        c.vendedor || "",
+        (c.recomendacao || "").replace(/[^\w\s]/g, ""),
+        c.siteHost || "",
+        c.url || ""
+      ]);
+      const csv = [headers.join(";"), ...rows.map(r => r.join(";"))].join("\n");
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `autospy_relatorio_${new Date().toISOString().split("T")[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
